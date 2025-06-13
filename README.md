@@ -4,8 +4,7 @@ CodexCity is a modern web app that empowers small businesses to automate their e
 
 __
 
-
-0. Get Started with CodexCity Today!
+☆. Get Started with CodexCity Today!
 Visit https://codexcity.xpensive.me/ for more information.
 
 --
