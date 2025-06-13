@@ -1,9 +1,8 @@
 import axios from 'axios';
-
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium';
+import type { EmailCategory } from './supabase';
 
 export interface ClassificationResult {
-  category: 'order_inquiry' | 'support_request' | 'general';
+  category: EmailCategory;
   confidence: number;
 }
 
@@ -14,27 +13,49 @@ export const classifyEmail = async (emailContent: string): Promise<Classificatio
     const content = emailContent.toLowerCase();
     
     // Keywords for different categories
-    const orderKeywords = ['order', 'purchase', 'buy', 'product', 'price', 'cost', 'payment', 'invoice', 'shipping', 'delivery'];
-    const supportKeywords = ['help', 'problem', 'issue', 'bug', 'error', 'not working', 'broken', 'fix', 'troubleshoot', 'support'];
+    const categoryKeywords: Record<EmailCategory, string[]> = {
+      order_inquiry: ['order', 'purchase', 'buy', 'product', 'price', 'cost', 'payment', 'invoice', 'shipping', 'delivery'],
+      support_request: ['help', 'problem', 'issue', 'bug', 'error', 'not working', 'broken', 'fix', 'troubleshoot', 'support'],
+      general: ['hello', 'hi', 'question', 'inquiry', 'information', 'contact'],
+      abandoned_cart: ['cart', 'checkout', 'abandoned', 'forgot', 'complete', 'purchase'],
+      welcome_email: ['welcome', 'new', 'signup', 'registration', 'account'],
+      re_engagement: ['miss', 'back', 'return', 'inactive', 'engagement'],
+      promotional: ['sale', 'discount', 'offer', 'promotion', 'deal', 'coupon'],
+      newsletter: ['newsletter', 'update', 'news', 'monthly', 'weekly'],
+      confirmation: ['confirm', 'confirmation', 'receipt', 'order placed'],
+      birthday: ['birthday', 'anniversary', 'celebration', 'special day'],
+      feedback_request: ['feedback', 'review', 'rating', 'experience', 'survey'],
+      cross_sell_upsell: ['upgrade', 'additional', 'complement', 'recommend'],
+      motivational: ['motivation', 'inspire', 'achieve', 'success', 'goal'],
+      back_in_stock: ['stock', 'available', 'restock', 'inventory'],
+      behavioral: ['behavior', 'activity', 'usage', 'pattern'],
+      drip_campaign: ['series', 'sequence', 'journey', 'step'],
+      email_marketing: ['marketing', 'campaign', 'strategy', 'roi'],
+      product_review: ['review', 'testimonial', 'opinion', 'rating'],
+      re_engagement_campaign: ['re-engage', 'win back', 'return', 'comeback'],
+      win_back: ['final', 'last chance', 'goodbye', 'leaving']
+    };
     
-    let orderScore = 0;
-    let supportScore = 0;
+    let bestCategory: EmailCategory = 'general';
+    let bestScore = 0;
     
-    orderKeywords.forEach(keyword => {
-      if (content.includes(keyword)) orderScore++;
+    // Score each category based on keyword matches
+    Object.entries(categoryKeywords).forEach(([category, keywords]) => {
+      let score = 0;
+      keywords.forEach(keyword => {
+        if (content.includes(keyword)) score++;
+      });
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestCategory = category as EmailCategory;
+      }
     });
     
-    supportKeywords.forEach(keyword => {
-      if (content.includes(keyword)) supportScore++;
-    });
+    // Calculate confidence based on score
+    const confidence = bestScore > 0 ? Math.min(bestScore / 5, 1) : 0.3;
     
-    if (orderScore > supportScore && orderScore > 0) {
-      return { category: 'order_inquiry', confidence: Math.min(orderScore / 5, 1) };
-    } else if (supportScore > 0) {
-      return { category: 'support_request', confidence: Math.min(supportScore / 5, 1) };
-    } else {
-      return { category: 'general', confidence: 0.5 };
-    }
+    return { category: bestCategory, confidence };
   } catch (error) {
     console.error('Email classification error:', error);
     return { category: 'general', confidence: 0.3 };
@@ -55,7 +76,13 @@ export const classifyEmailWithHuggingFace = async (emailContent: string): Promis
       {
         inputs: emailContent,
         parameters: {
-          candidate_labels: ['order inquiry', 'support request', 'general inquiry']
+          candidate_labels: [
+            'order inquiry', 'support request', 'general inquiry', 'abandoned cart',
+            'welcome email', 're-engagement', 'promotional', 'newsletter',
+            'confirmation', 'birthday', 'feedback request', 'cross-sell upsell',
+            'motivational', 'back in stock', 'behavioral', 'drip campaign',
+            'email marketing', 'product review', 're-engagement campaign', 'win back'
+          ]
         }
       },
       {
@@ -68,10 +95,33 @@ export const classifyEmailWithHuggingFace = async (emailContent: string): Promis
     
     const result = response.data;
     const topLabel = result.labels[0];
-    let category: 'order_inquiry' | 'support_request' | 'general' = 'general';
+    let category: EmailCategory = 'general';
     
-    if (topLabel.includes('order')) category = 'order_inquiry';
-    else if (topLabel.includes('support')) category = 'support_request';
+    // Map labels to categories
+    const labelMap: Record<string, EmailCategory> = {
+      'order inquiry': 'order_inquiry',
+      'support request': 'support_request',
+      'general inquiry': 'general',
+      'abandoned cart': 'abandoned_cart',
+      'welcome email': 'welcome_email',
+      're-engagement': 're_engagement',
+      'promotional': 'promotional',
+      'newsletter': 'newsletter',
+      'confirmation': 'confirmation',
+      'birthday': 'birthday',
+      'feedback request': 'feedback_request',
+      'cross-sell upsell': 'cross_sell_upsell',
+      'motivational': 'motivational',
+      'back in stock': 'back_in_stock',
+      'behavioral': 'behavioral',
+      'drip campaign': 'drip_campaign',
+      'email marketing': 'email_marketing',
+      'product review': 'product_review',
+      're-engagement campaign': 're_engagement_campaign',
+      'win back': 'win_back'
+    };
+    
+    category = labelMap[topLabel] || 'general';
     
     return {
       category,
