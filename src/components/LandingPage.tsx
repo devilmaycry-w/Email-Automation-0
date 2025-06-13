@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Zap, Mail, Brain, BarChart3, CheckCircle, ArrowRight, Star, Users, Clock, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap, Mail, Brain, BarChart3, CheckCircle, ArrowRight, Star, Users, Clock, Shield, X, Play } from 'lucide-react';
 import { AuthModal } from './Auth/AuthModal';
 
 interface LandingPageProps {
@@ -9,6 +9,7 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   const features = [
     {
@@ -66,6 +67,87 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
     }
   };
 
+  // Demo Modal Component
+  const DemoModal = () => (
+    <AnimatePresence>
+      {showDemoModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowDemoModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <button
+                onClick={() => setShowDemoModal(false)}
+                className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-6">
+                <Play className="w-8 h-8 text-white" />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Demo Video Coming Soon!
+              </h2>
+              
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Our comprehensive demo video is currently in production. 
+                In the meantime, why don't you try the platform yourself? 
+                It's the best way to experience the power of AI-driven email automation!
+              </p>
+              
+              {/* TODO: Add video link here when available */}
+              {/* <a href="https://youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" rel="noopener noreferrer"> */}
+              {/*   Watch Demo Video */}
+              {/* </a> */}
+              
+              <div className="space-y-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setShowDemoModal(false);
+                    setShowAuthModal(true);
+                  }}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-6 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  Try It Yourself
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+                
+                <button
+                  onClick={() => setShowDemoModal(false)}
+                  className="w-full text-gray-500 hover:text-gray-700 py-2 font-medium transition-colors"
+                >
+                  Maybe Later
+                </button>
+              </div>
+              
+              <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Pro Tip:</strong> Start with our free trial to explore all features 
+                  including AI classification, automated responses, and real-time analytics!
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
@@ -73,12 +155,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto px-4 py-16 max-w-7xl"
+        className="container mx-auto px-4 py-8 max-w-7xl"
       >
-        {/* Navigation */}
-        <motion.nav variants={itemVariants} className="flex items-center justify-between mb-16">
+        {/* Navigation - Positioned higher with better spacing */}
+        <motion.nav variants={itemVariants} className="flex items-center justify-between mb-12 pt-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg">
               <Zap className="w-8 h-8 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">CodexCity</span>
@@ -88,17 +170,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAuthModal(true)}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center gap-2"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
           >
             Get Started
             <ArrowRight className="w-4 h-4" />
           </motion.button>
         </motion.nav>
 
-        {/* Hero Content */}
-        <div className="text-center mb-20">
+        {/* Hero Content - Adjusted spacing */}
+        <div className="text-center mb-16">
           <motion.div variants={itemVariants} className="mb-6">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Star className="w-4 h-4" />
               Trusted by 500+ businesses worldwide
             </div>
@@ -121,7 +203,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowAuthModal(true)}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-3"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
             >
               Start Free Trial
               <ArrowRight className="w-5 h-5" />
@@ -130,8 +212,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
+              onClick={() => setShowDemoModal(true)}
+              className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 flex items-center justify-center gap-3 hover:shadow-lg"
             >
+              <Play className="w-5 h-5" />
               Watch Demo
             </motion.button>
           </motion.div>
@@ -195,7 +279,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowAuthModal(true)}
-              className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3"
+              className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
             >
               Get Started Now
               <ArrowRight className="w-5 h-5" />
@@ -228,6 +312,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthSuccess }) => {
           onAuthSuccess();
         }}
       />
+
+      {/* Demo Modal */}
+      <DemoModal />
     </div>
   );
 };
