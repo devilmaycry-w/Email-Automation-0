@@ -3,7 +3,8 @@
 CodexCity is a modern web app that empowers small businesses to automate their email communication. It makes it easy for users to send professional, personalized emails—like order confirmations, support replies, and notifications—without technical hassle.
 __
 
-⚡️**Get Started with CodexCity Today!**
+
+⚡️Get Started with CodexCity Today!
 Visit https://codexcity.xpensive.me/ for more information.
 --
 
