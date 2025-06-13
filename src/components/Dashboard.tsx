@@ -7,6 +7,7 @@ import { EmailTemplates } from './EmailTemplates';
 import { RecentEmails } from './RecentEmails';
 import { IntegrationSettings } from './IntegrationSettings';
 import { UserProfile } from './UserProfile';
+import { CreatorFooter } from './CreatorFooter';
 import type { AuthUser } from '../lib/auth';
 
 interface DashboardProps {
@@ -150,6 +151,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange, activeTab, us
           <RecentEmails emails={stats.recentEmails} />
         </motion.div>
       )}
+
+      {/* Creator Footer */}
+      <motion.div variants={itemVariants}>
+        <CreatorFooter />
+      </motion.div>
     </motion.div>
   );
 };
